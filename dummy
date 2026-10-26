@@ -1,0 +1,11 @@
+# Sobel 3x3 kernels (center-weighted gradient approximations)
+SOBEL_X = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float64)
+SOBEL_Y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float64)
+
+
+def sobel_edges(img):
+    """Gradient magnitude with Sobel 3x3 kernels (normalized by 1/4 to gray levels per pixel)."""
+    f = img.astype(np.float64)
+    gx = cv2.filter2D(f, cv2.CV_64F, SOBEL_X)
+    gy = cv2.filter2D(f, cv2.CV_64F, SOBEL_Y)
+    return np.hypot(gx, gy) / 4.0
