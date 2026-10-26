@@ -144,7 +144,7 @@ def prewitt_edges(img):
     f = img.astype(np.float64)
     gx = cv2.filter2D(f, cv2.CV_64F, PREWITT_X)  # filter2D filters each channel separately
     gy = cv2.filter2D(f, cv2.CV_64F, PREWITT_Y)
-    return np.hypot(gx, gy)
+    return np.hypot(gx, gy) / 6.0
 
 
 # Sobel 3x3 kernels (center-weighted gradient approximations)
@@ -157,7 +157,7 @@ def sobel_edges(img):
     f = img.astype(np.float64)
     gx = cv2.filter2D(f, cv2.CV_64F, SOBEL_X)
     gy = cv2.filter2D(f, cv2.CV_64F, SOBEL_Y)
-    return np.hypot(gx, gy)
+    return np.hypot(gx, gy) / 8.0
 
 
 def laplacian_signed(img):
