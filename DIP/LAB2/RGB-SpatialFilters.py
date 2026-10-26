@@ -140,7 +140,6 @@ PREWITT_Y = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]], dtype=np.float64)
 
 
 def prewitt_edges(img):
-    """Gradient magnitude with Prewitt kernels, divided by 3 so it is in gray levels per pixel."""
     f = img.astype(np.float64)
     gx = cv2.filter2D(f, cv2.CV_64F, PREWITT_X)  # filter2D filters each channel separately
     gy = cv2.filter2D(f, cv2.CV_64F, PREWITT_Y)
@@ -153,7 +152,6 @@ SOBEL_Y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float64)
 
 
 def sobel_edges(img):
-    """Gradient magnitude with Sobel 3x3 kernels (normalized by 1/4 to gray levels per pixel)."""
     f = img.astype(np.float64)
     gx = cv2.filter2D(f, cv2.CV_64F, SOBEL_X)
     gy = cv2.filter2D(f, cv2.CV_64F, SOBEL_Y)
