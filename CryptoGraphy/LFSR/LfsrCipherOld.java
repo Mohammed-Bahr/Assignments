@@ -5,21 +5,22 @@ import java.util.Random;
 import java.util.Scanner;
 
 /**
- * LFSR stream cipher: encrypts / decrypts a message by XOR with an LFSR keystream.
+ * LFSR stream cipher: encrypts / decrypts a message by XOR with an LFSR
+ * keystream.
  *
  * Polynomial table source:
- *     R. Ward and T. Molteno, "Table of Linear Feedback Shift Registers"
- *     (University of Otago, 2007) - entry with the fewest taps for each m.
- *     Key = m, value = exponents of the primitive polynomial.
- *     Example: 4 -> {4, 3, 0}  means  x^4 + x^3 + 1.
+ * R. Ward and T. Molteno, "Table of Linear Feedback Shift Registers"
+ * (University of Otago, 2007) - entry with the fewest taps for each m.
+ * Key = m, value = exponents of the primitive polynomial.
+ * Example: 4 -> {4, 3, 0} means x^4 + x^3 + 1.
  */
-public class LfsrCipher {
+public class LfsrCipherOld {
 
     // ----------------------------------------------------------------------
     // Constants
     // ----------------------------------------------------------------------
-    private static final int MAX_TABLE_ROWS = 20;   // rows of the clock table printed
-    private static final int MAX_COLUMNS_M = 16;    // above this m, flip-flops are printed compactly
+    private static final int MAX_TABLE_ROWS = 20; // rows of the clock table printed
+    private static final int MAX_COLUMNS_M = 16; // above this m, flip-flops are printed compactly
 
     private static final Map<Integer, int[]> PRIMITIVE_POLYNOMIALS = new HashMap<>();
 
@@ -202,13 +203,14 @@ public class LfsrCipher {
     // ----------------------------------------------------------------------
 
     /**
-     * Fibonacci LFSR with flip-flops FF1 ... FFm (state[0] = FF1, state[m-1] = FFm).
+     * Fibonacci LFSR with flip-flops FF1 ... FFm (state[0] = FF1, state[m-1] =
+     * FFm).
      *
      * Each clock:
-     *   output   = FFm
-     *   feedback = XOR of the flip-flops whose index is a polynomial exponent
-     *              (the x^0 term is the feedback input, not a flip-flop)
-     *   shift    : FF(i) <- FF(i-1),  FF1 <- feedback
+     * output = FFm
+     * feedback = XOR of the flip-flops whose index is a polynomial exponent
+     * (the x^0 term is the feedback input, not a flip-flop)
+     * shift : FF(i) <- FF(i-1), FF1 <- feedback
      */
     private static class Lfsr {
         private final int[] taps;
@@ -246,11 +248,15 @@ public class LfsrCipher {
     private static String polynomialToString(int[] exponents) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < exponents.length; i++) {
-            if (i > 0) sb.append(" + ");
+            if (i > 0)
+                sb.append(" + ");
             int e = exponents[i];
-            if (e == 0) sb.append("1");
-            else if (e == 1) sb.append("x");
-            else sb.append("x^").append(e);
+            if (e == 0)
+                sb.append("1");
+            else if (e == 1)
+                sb.append("x");
+            else
+                sb.append("x^").append(e);
         }
         return sb.toString();
     }
@@ -301,7 +307,8 @@ public class LfsrCipher {
     /** {1, 0, 1} -> "101" */
     private static String bitsToStr(int[] bits) {
         StringBuilder sb = new StringBuilder();
-        for (int bit : bits) sb.append(bit);
+        for (int bit : bits)
+            sb.append(bit);
         return sb.toString();
     }
 
@@ -312,7 +319,8 @@ public class LfsrCipher {
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < state.length; i++) {
-            if (i > 0) sb.append(' ');
+            if (i > 0)
+                sb.append(' ');
             sb.append(state[i]);
         }
         return sb.toString();
@@ -346,7 +354,8 @@ public class LfsrCipher {
         while (true) {
             System.out.print("Enter the message: ");
             String message = in.nextLine();
-            if (!message.isEmpty()) return message;
+            if (!message.isEmpty())
+                return message;
             System.out.println("  Message cannot be empty, try again.");
         }
     }
@@ -358,7 +367,8 @@ public class LfsrCipher {
             String raw = in.nextLine().trim();
             try {
                 int m = Integer.parseInt(raw);
-                if (PRIMITIVE_POLYNOMIALS.containsKey(m)) return m;
+                if (PRIMITIVE_POLYNOMIALS.containsKey(m))
+                    return m;
             } catch (NumberFormatException ignored) {
                 // falls through to the error message below
             }
@@ -374,9 +384,11 @@ public class LfsrCipher {
             boolean hasOne = false;
             for (int i = 0; i < m; i++) {
                 vector[i] = random.nextInt(2);
-                if (vector[i] == 1) hasOne = true;
+                if (vector[i] == 1)
+                    hasOne = true;
             }
-            if (hasOne) return vector;
+            if (hasOne)
+                return vector;
         }
     }
 
@@ -433,7 +445,7 @@ public class LfsrCipher {
         System.out.println("=".repeat(60));
 
         int[] exponents = PRIMITIVE_POLYNOMIALS.get(m);
-        Lfsr lfsr = new Lfsr(exponents, initialVector);   // fresh LFSR, reset to the initial vector
+        Lfsr lfsr = new Lfsr(exponents, initialVector); // fresh LFSR, reset to the initial vector
         int[] plainBits = new int[cipherBits.length];
 
         System.out.println("Polynomial     : " + polynomialToString(exponents));
