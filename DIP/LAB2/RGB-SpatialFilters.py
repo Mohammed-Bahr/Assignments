@@ -299,7 +299,7 @@ def main():
     p.add_argument(
         "--sigma",
         type=float,
-        default=20.0,
+        default=50.0,
         help="std of the Gaussian noise for Exp 1 (default 20)",
     )
     p.add_argument(
