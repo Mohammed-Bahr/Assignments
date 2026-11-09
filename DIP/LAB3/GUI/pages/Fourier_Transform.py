@@ -7,6 +7,7 @@ import streamlit as st
 import matplotlib
 
 matplotlib.use("Agg")  # we only show images in the page, no pop-up windows
+import matplotlib.pyplot as plt
 
 # Find the folder that contains FrequencyFilters.py (searching upwards from this file)
 root = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +19,8 @@ while not os.path.exists(os.path.join(root, "FrequencyFilters.py")):
 sys.path.insert(0, root)
 
 import FrequencyFilters as ff  # our functions from the assignment script
+
+OUT_DIR = os.path.join(root, "Assignment3_output")  # same output folder as the command-line script
 
 
 # --------------------------------------------------------------------------
@@ -75,6 +78,9 @@ high_raw = ff.to_spatial(F_high)
 low_img = ff.to_u8(low_raw)
 high_img = ff.scale_abs_to_u8(high_raw)
 
+mask_low = ff.to_u8(H_low[..., 0] * 255)
+mask_high = ff.to_u8(H_high[..., 0] * 255)
+
 energy = float(np.sum(np.abs(F) ** 2))
 energy_low = 100 * float(np.sum(np.abs(F_low) ** 2)) / energy
 energy_high = 100 * float(np.sum(np.abs(F_high) ** 2)) / energy
@@ -93,12 +99,58 @@ show(c2, spec_orig, "Original spectrum (log magnitude)")
 
 st.subheader("Low-pass filter (LPF)")
 c1, c2, c3 = st.columns(3)
-show(c1, ff.to_u8(H_low[..., 0] * 255), "LPF mask")
+show(c1, mask_low, "LPF mask")
 show(c2, spec_low, "Spectrum after LPF")
 show(c3, low_img, "Spatial domain after LPF")
 
 st.subheader("High-pass filter (HPF)")
 c1, c2, c3 = st.columns(3)
-show(c1, ff.to_u8(H_high[..., 0] * 255), "HPF mask")
+show(c1, mask_high, "HPF mask")
 show(c2, spec_high, "Spectrum after HPF")
 show(c3, high_img, "Spatial domain after HPF (|result|, scaled)")
+
+
+# --------------------------------------------------------------------------
+# Saving (same files and names as the command-line script)
+# --------------------------------------------------------------------------
+def build_figure():
+    """The combined figure of the experiment (same layout as exp1_frequency_filtering.png)."""
+    fig, ax = plt.subplots(3, 3, figsize=(13, 12), constrained_layout=True)
+    fig.suptitle(f"Experiment 1: {kind.capitalize()} low-pass / high-pass filtering (D0 = {cutoff:g})", fontsize=15)
+    ff.show_img(ax[0, 0], img, "Original image")
+    ff.show_img(ax[0, 1], spec_orig, "Original spectrum (log magnitude)")
+    ax[0, 2].axis("off")
+    ff.show_img(ax[1, 0], mask_low, "Low-pass filter (LPF)")
+    ff.show_img(ax[1, 1], spec_low, "Spectrum after LPF")
+    ff.show_img(ax[1, 2], low_img, "Spatial domain after LPF")
+    ff.show_img(ax[2, 0], mask_high, "High-pass filter (HPF)")
+    ff.show_img(ax[2, 1], spec_high, "Spectrum after HPF")
+    ff.show_img(ax[2, 2], high_img, "Spatial domain after HPF (|result|, scaled)")
+    return fig
+
+
+st.sidebar.header("Save")
+
+if st.sidebar.button("Save all images"):
+    # every image in its own PNG file, inside Assignment3_output/exp1
+    images = {
+        "original": img,
+        "spectrum_original": spec_orig,
+        "lpf_mask": mask_low,
+        "hpf_mask": mask_high,
+        "spectrum_after_lpf": spec_low,
+        "spectrum_after_hpf": spec_high,
+        "lpf_result": low_img,
+        "hpf_result": high_img,
+    }
+    for name, im in images.items():
+        ff.save_img(im, OUT_DIR, "exp1", name)
+    st.sidebar.success(f"Saved {len(images)} images in {os.path.join(OUT_DIR, 'exp1')}")
+
+if st.sidebar.button("Save combined figure"):
+    # one PNG with the whole experiment, inside Assignment3_output
+    os.makedirs(OUT_DIR, exist_ok=True)
+    fig = build_figure()
+    ff.save(fig, OUT_DIR, "exp1_frequency_filtering.png")
+    plt.close(fig)
+    st.sidebar.success(f"Saved {os.path.join(OUT_DIR, 'exp1_frequency_filtering.png')}")
